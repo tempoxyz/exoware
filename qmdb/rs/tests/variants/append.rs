@@ -106,10 +106,9 @@ fn compact_config<C>(prefix: &str, codec: C) -> immutable::CompactConfig<C, Sequ
         witness: common::variable_journal_config(
             &format!("{prefix}-witness"),
             page_cache(),
-            (),
+            codec,
             NZU64!(7),
         ),
-        commit_codec_config: codec,
     }
 }
 

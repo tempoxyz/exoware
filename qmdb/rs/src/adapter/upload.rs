@@ -47,7 +47,7 @@ use commonware_storage::{
     merkle::{Family, Graftable, Location, Position},
     qmdb::{
         any::operation::{Operation as AnyOperation, Update},
-        current::{batch::MerkleizedBatch, db::Db, grafting, proof::OpsRootWitness},
+        current::{batch::MerkleizedBatch, Db, grafting, proof::OpsRootWitness},
         immutable, keyless,
         operation::{Committable, Floored, Key as QmdbKey},
         value::ValueEncoding,
@@ -90,7 +90,7 @@ where
         match self {
             Self::Delete(key) => Some((key.as_ref(), false)),
             Self::Update(update) => Some((update.key().as_ref(), true)),
-            Self::CommitFloor(_, _) => None,
+            Self::Commit(_, _) => None,
         }
     }
 }
@@ -275,7 +275,7 @@ where
         Ok(Self {
             start_location: Location::new(0),
             pinned_nodes: Vec::new(),
-            operations: Arc::new(vec![AnyOperation::CommitFloor(None, Location::new(0))]),
+            operations: Arc::new(vec![AnyOperation::Commit(None, Location::new(0))]),
             root: db.root(),
             ops_root_witness: db.ops_root_witness().clone(),
             pruned_chunks: bitmap.pruned_chunks() as u64,
@@ -1201,11 +1201,11 @@ mod tests {
             Some((key.as_ref(), false))
         );
         assert_eq!(
-            Unordered::CommitFloor(None, Location::new(0)).indexed_key(),
+            Unordered::Commit(None, Location::new(0)).indexed_key(),
             None
         );
         assert_eq!(
-            Ordered::CommitFloor(None, Location::new(0)).indexed_key(),
+            Ordered::Commit(None, Location::new(0)).indexed_key(),
             None
         );
         let immutable = Immutable::Set(vec![1, 0, 2], vec![3, 4]);
@@ -1278,7 +1278,7 @@ mod tests {
                     FixedBytes::new([2; 8]),
                 )),
                 AnyOperation::Delete(FixedBytes::new([3; 8])),
-                AnyOperation::CommitFloor(Some(FixedBytes::new([4; 8])), Location::new(2)),
+                AnyOperation::Commit(Some(FixedBytes::new([4; 8])), Location::new(2)),
             ]),
             root: Sha256::hash(&[b"root"]),
             ops_root_witness: OpsRootWitness {
