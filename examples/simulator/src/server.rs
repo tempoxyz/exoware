@@ -49,10 +49,24 @@ fn app(engine: RocksStore) -> Router {
         .layer(CorsLayer::very_permissive())
 }
 
-/// Run the store simulator until the process is interrupted.
+/// Run the store simulator on every interface until the process is interrupted.
 pub async fn run(
     directory: &Path,
     port: u16,
+    max_open_files: i32,
+) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    run_on(
+        directory,
+        SocketAddr::from(([0, 0, 0, 0], port)),
+        max_open_files,
+    )
+    .await
+}
+
+/// Run the store simulator on `addr` until the process is interrupted.
+pub async fn run_on(
+    directory: &Path,
+    addr: SocketAddr,
     max_open_files: i32,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let app = app(RocksStore::open(
@@ -60,7 +74,6 @@ pub async fn run(
         Some(store_config(max_open_files)),
     )?);
 
-    let addr = SocketAddr::from(([0, 0, 0, 0], port));
     info!(%addr, directory = %directory.display(), "store simulator listening");
     let listener = tokio::net::TcpListener::bind(addr)
         .await?
