@@ -1,6 +1,8 @@
 use crate::SimplexReader;
 use bytes::Bytes;
-use commonware_consensus::marshal::resolver::handler::{self, Annotation, Key as MarshalKey};
+use commonware_consensus::simplex::marshal::resolver::handler::{
+    self, Annotation, Key as MarshalKey,
+};
 use commonware_cryptography::{Digest, PublicKey};
 use commonware_resolver::opaque;
 use commonware_runtime::{Clock, Metrics, Spawner};
