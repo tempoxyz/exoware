@@ -2,8 +2,10 @@ use bytes::{BufMut, Bytes, BytesMut};
 use commonware_actor::Feedback;
 use commonware_codec::{Buf, Decode, Encode, EncodeSize, Error, Read, ReadExt, Write};
 use commonware_consensus::{
-    marshal::{core::Actor, standard::Standard, Config as MarshalConfig, Start, Update},
-    simplex::types::{Finalization, Finalize, Notarization, Notarize, Proposal},
+    simplex::{
+        marshal::{core::Actor, standard::Standard, Config as MarshalConfig, Start, Update},
+        types::{Finalization, Finalize, Notarization, Notarize, Proposal},
+    },
     types::{Epoch, FixedEpocher, Height, Round, View, ViewDelta},
     Block as ConsensusBlock, CertifiableBlock, Heightable, Reporter,
 };

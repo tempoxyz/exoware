@@ -47,9 +47,9 @@ use commonware_storage::{
     merkle::{Family, Graftable, Location, Position},
     qmdb::{
         any::operation::{Operation as AnyOperation, Update},
-        current::{batch::MerkleizedBatch, Db, grafting, proof::OpsRootWitness},
+        current::{batch::MerkleizedBatch, grafting, proof::OpsRootWitness, Db},
         immutable, keyless,
-        operation::{Committable, Floored, Key as QmdbKey},
+        operation::{Committable, Key as QmdbKey},
         value::ValueEncoding,
     },
     Context,
@@ -75,7 +75,7 @@ pub struct AuthenticatedOperationRange<'a, D: Digest, F: Family> {
 }
 
 /// A QMDB operation whose keyed changes can be indexed for historical queries.
-pub trait UploadOperation<F: Family>: Codec + Floored<F> {
+pub trait UploadOperation<F: Family>: Codec + Committable<F> {
     /// Return the affected key and whether its value is present after this operation.
     ///
     /// Commits and keyless operations return `None`. Deletions return `Some((key, false))`.
@@ -901,9 +901,13 @@ mod tests {
         }
     }
 
-    impl<F: Family> Floored<F> for AliasedCommit {
+    impl<F: Family> Committable<F> for AliasedCommit {
         fn inactivity_floor(&self) -> Option<Location<F>> {
             Some(Location::new(0))
+        }
+
+        fn initial_commit() -> Self {
+            Self(0)
         }
     }
 
@@ -1204,10 +1208,7 @@ mod tests {
             Unordered::Commit(None, Location::new(0)).indexed_key(),
             None
         );
-        assert_eq!(
-            Ordered::Commit(None, Location::new(0)).indexed_key(),
-            None
-        );
+        assert_eq!(Ordered::Commit(None, Location::new(0)).indexed_key(), None);
         let immutable = Immutable::Set(vec![1, 0, 2], vec![3, 4]);
         assert_eq!(immutable.indexed_key(), Some(([1, 0, 2].as_slice(), true)));
         assert_eq!(
